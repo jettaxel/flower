@@ -108,7 +108,7 @@ const Header = ({ cartItems }) => {
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-black text-purple-800 dark:text-white rounded-xl shadow-lg transition-all duration-200 border border-purple-200 dark:border-purple-700/40">
                   {user && user.role === 'admin' && (
-                    <Link to="/dashboard" className="block px-4 py-2 hover:bg-purple-50 dark:hover:bg-purple-800/60 rounded-t-xl" onClick={() => setIsDropdownOpen(false)}>
+                    <Link to="/admin/dashboard" className="block px-4 py-2 hover:bg-purple-50 dark:hover:bg-purple-800/60 rounded-t-xl" onClick={() => setIsDropdownOpen(false)}>
                       Dashboard
                     </Link>
                   )}
