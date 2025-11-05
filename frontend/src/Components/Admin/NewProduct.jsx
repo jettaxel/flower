@@ -67,22 +67,23 @@ const NewProduct = () => {
     }
   };
 
-  const onChange = (e) => {
-    const files = Array.from(e.target.files);
-    setImagesPreview([]);
-    setImages([]);
+const onChange = (e) => {
+  const files = Array.from(e.target.files);
+  setImages(files); // ✅ Store actual File objects for upload
+  setImagesPreview([]); // reset previews
 
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (reader.readyState === 2) {
-          setImagesPreview((oldArray) => [...oldArray, reader.result]);
-          setImages((oldArray) => [...oldArray, reader.result]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-  };
+  // still show previews
+  files.forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (reader.readyState === 2) {
+        setImagesPreview((old) => [...old, reader.result]);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+};
+
 
   return (
     <>
