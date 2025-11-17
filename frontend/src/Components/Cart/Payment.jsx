@@ -48,7 +48,7 @@ const Payment = ({cartItems, shippingInfo, clearCart}) => {
                 : 'Order created successfully! (Email notification failed)';
                 
             toast.success(successMessage, {
-                position: toast.POSITION.BOTTOM_RIGHT,
+                position: 'bottom-right',
                 autoClose: 5000
             });
 
@@ -56,26 +56,35 @@ const Payment = ({cartItems, shippingInfo, clearCart}) => {
             if (typeof clearCart === 'function') {
                 clearCart();
             }
-           
-            // sessionStorage.removeItem('orderInfo')
-            // navigate('/success')
+            
+            // Clear orderInfo from sessionStorage
+            sessionStorage.removeItem('orderInfo')
+            
+            // Navigate to success page after cart is cleared
+            navigate('/success')
     
         } catch (error) {
-            toast.error(error.response.data.message, {
-                position: toast.POSITION.BOTTOM_RIGHT
+            setLoading(false)
+            document.querySelector('#pay_btn').disabled = false;
+            toast.error(error.response?.data?.message || 'Failed to create order', {
+                position: 'bottom-right'
             });
-           }
+        }
     }
 
     const submitHandler = async (e) => {
         e.preventDefault();
-        document.querySelector('#pay_btn').disabled = true;
+        const payBtn = document.querySelector('#pay_btn');
+        if (payBtn) {
+            payBtn.disabled = true;
+        }
+        setLoading(true);
         order.paymentInfo = {
             id: 'pi_1DpdYh2eZvKYlo2CYIynhU32',
             status: 'succeeded'
         }
-        createOrder(order)
-        navigate('/success')
+        // Wait for order creation to complete before navigating
+        await createOrder(order)
       }
 
     return (

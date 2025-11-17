@@ -95,23 +95,21 @@ function App() {
       }
 
       const isItemExist = state.cartItems.find(i => i.product === item.product)
+      let updatedCartItems;
+
+      if (isItemExist) {
+        updatedCartItems = state.cartItems.map(i => i.product === isItemExist.product ? item : i)
+      } else {
+        updatedCartItems = [...state.cartItems, item]
+      }
 
       setState({
         ...state,
-        cartItems: [...state.cartItems, item]
+        cartItems: updatedCartItems
       })
-      if (isItemExist) {
-        setState({
-          ...state,
-          cartItems: state.cartItems.map(i => i.product === isItemExist.product ? item : i)
-        })
-      }
-      else {
-        setState({
-          ...state,
-          cartItems: [...state.cartItems, item]
-        })
-      }
+      
+      // Update localStorage after state update
+      localStorage.setItem('cartItems', JSON.stringify(updatedCartItems))
 
       toast.success('Item Added to Cart', {
         position: 'bottom-right'
@@ -126,11 +124,12 @@ function App() {
 
   }
   const removeItemFromCart = async (id) => {
+    const updatedCartItems = state.cartItems.filter(i => i.product !== id)
     setState({
       ...state,
-      cartItems: state.cartItems.filter(i => i.product !== id)
+      cartItems: updatedCartItems
     })
-    localStorage.setItem('cartItems', JSON.stringify(state.cartItems))
+    localStorage.setItem('cartItems', JSON.stringify(updatedCartItems))
   }
 
   const saveShippingInfo = async (data) => {
