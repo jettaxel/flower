@@ -13,7 +13,7 @@ const generateOrderReceipt = async (orderData) => {
         // Launch puppeteer
         const browser = await puppeteer.launch({
             headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
         
         const page = await browser.newPage();
@@ -49,6 +49,13 @@ const generateOrderReceipt = async (orderData) => {
         
     } catch (error) {
         console.error('Error generating PDF:', error);
+        
+        // Provide helpful error message if Chrome is not found
+        if (error.message && error.message.includes('Could not find Chrome')) {
+            const helpfulError = `Chrome browser not found. Please run: npx puppeteer browsers install chrome\nOriginal error: ${error.message}`;
+            return { success: false, error: helpfulError };
+        }
+        
         return { success: false, error: error.message };
     }
 };

@@ -215,8 +215,20 @@ exports.updateOrder = async (req, res, next) => {
     }
 }
 
-async function updateStock(id, quantity) {
-    const product = await Product.findById(id);
+async function updateStock(productOrId, quantity) {
+    const productId = productOrId && productOrId._id ? productOrId._id : productOrId;
+
+    if (!productId) {
+        console.error('updateStock called without valid product id:', productOrId);
+        return;
+    }
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+        console.error('Product not found for stock update, id:', productId);
+        return;
+    }
 
     product.stock = product.stock - quantity;
 
