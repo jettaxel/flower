@@ -33,11 +33,7 @@ const Cart = ({ addItemToCart, removeItemFromCart, cartItems }) => {
 
       {cartItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-[#4A3F35]">
-          <img
-            src="/images/empty-cart.png"
-            alt="Empty Cart"
-            className="w-48 mb-6 opacity-80"
-          />
+      
           <h2 className="text-2xl font-semibold mb-2">Your Cart is Empty</h2>
           <Link
             to="/"
