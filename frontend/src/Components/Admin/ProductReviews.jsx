@@ -38,6 +38,7 @@ const ProductReviews = () => {
                         reviewer: review.name || review.user,
                         product: product.name,
                         productId: product._id,
+                        productRating: product.ratings || 0,
                     })
                 })
             })
@@ -151,6 +152,32 @@ const ProductReviews = () => {
 
     const rows = listReviews;
 
+    // Calculate review statistics
+    const reviewStats = {
+        total: listReviews.length,
+        fiveStar: listReviews.filter(r => r.rating === 5).length,
+        fourStar: listReviews.filter(r => r.rating === 4).length,
+        threeStar: listReviews.filter(r => r.rating === 3).length,
+        twoStar: listReviews.filter(r => r.rating === 2).length,
+        oneStar: listReviews.filter(r => r.rating === 1).length,
+        highRated: listReviews.filter(r => r.rating >= 4).length,
+        lowRated: listReviews.filter(r => r.rating <= 2).length,
+    };
+
+    // Get products with 5 star reviews
+    const productsWithFiveStars = [...new Set(
+        listReviews
+            .filter(r => r.rating === 5)
+            .map(r => r.product)
+    )];
+
+    // Get products with low star reviews (1-2 stars)
+    const productsWithLowStars = [...new Set(
+        listReviews
+            .filter(r => r.rating <= 2)
+            .map(r => r.product)
+    )];
+
     return (
         <>
             <MetaData title={'Product Reviews'} />
@@ -168,6 +195,100 @@ const ProductReviews = () => {
                                 <p className="text-sm text-gray-600 dark:text-ink-muted">
                                     View and manage every review across your store. Each row shows the product and who reviewed it.
                                 </p>
+                            </div>
+                        </div>
+
+                        {/* Review Statistics Cards */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
+                            <div className="bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-purple-100 mb-1">Total Reviews</p>
+                                <p className="text-2xl font-bold">{reviewStats.total}</p>
+                                <p className="text-xs text-purple-100 mt-1">All reviews</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-yellow-100 mb-1">5 Stars</p>
+                                <p className="text-2xl font-bold">{reviewStats.fiveStar}</p>
+                                <p className="text-xs text-yellow-100 mt-1">Excellent</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-blue-100 mb-1">4 Stars</p>
+                                <p className="text-2xl font-bold">{reviewStats.fourStar}</p>
+                                <p className="text-xs text-blue-100 mt-1">Very Good</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-indigo-400 to-indigo-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-indigo-100 mb-1">3 Stars</p>
+                                <p className="text-2xl font-bold">{reviewStats.threeStar}</p>
+                                <p className="text-xs text-indigo-100 mt-1">Average</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-orange-100 mb-1">2 Stars</p>
+                                <p className="text-2xl font-bold">{reviewStats.twoStar}</p>
+                                <p className="text-xs text-orange-100 mt-1">Poor</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-red-500 to-rose-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-red-100 mb-1">1 Star</p>
+                                <p className="text-2xl font-bold">{reviewStats.oneStar}</p>
+                                <p className="text-xs text-red-100 mt-1">Very Poor</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-green-100 mb-1">High Rated</p>
+                                <p className="text-2xl font-bold">{reviewStats.highRated}</p>
+                                <p className="text-xs text-green-100 mt-1">4+ stars</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-red-600 to-pink-600 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-red-100 mb-1">Low Rated</p>
+                                <p className="text-2xl font-bold">{reviewStats.lowRated}</p>
+                                <p className="text-xs text-red-100 mt-1">1-2 stars</p>
+                            </div>
+                        </div>
+
+                        {/* Products with 5 Stars and Low Stars */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border-2 border-yellow-300 dark:border-yellow-500/30 rounded-xl p-5">
+                                <h3 className="text-lg font-semibold text-yellow-900 dark:text-yellow-200 mb-3 flex items-center gap-2">
+                                    <span className="text-2xl">⭐</span>
+                                    Products with 5 Star Reviews
+                                </h3>
+                                <p className="text-3xl font-bold text-yellow-700 dark:text-yellow-300 mb-2">{productsWithFiveStars.length}</p>
+                                {productsWithFiveStars.length > 0 ? (
+                                    <div className="mt-3 space-y-1">
+                                        {productsWithFiveStars.slice(0, 3).map((product, idx) => (
+                                            <p key={idx} className="text-sm text-yellow-800 dark:text-yellow-200">• {product}</p>
+                                        ))}
+                                        {productsWithFiveStars.length > 3 && (
+                                            <p className="text-xs text-yellow-600 dark:text-yellow-400">+{productsWithFiveStars.length - 3} more</p>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-yellow-700 dark:text-yellow-300">No products with 5 star reviews yet</p>
+                                )}
+                            </div>
+
+                            <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-2 border-red-300 dark:border-red-500/30 rounded-xl p-5">
+                                <h3 className="text-lg font-semibold text-red-900 dark:text-red-200 mb-3 flex items-center gap-2">
+                                    <span className="text-2xl">⚠️</span>
+                                    Products with Low Reviews
+                                </h3>
+                                <p className="text-3xl font-bold text-red-700 dark:text-red-300 mb-2">{productsWithLowStars.length}</p>
+                                {productsWithLowStars.length > 0 ? (
+                                    <div className="mt-3 space-y-1">
+                                        {productsWithLowStars.slice(0, 3).map((product, idx) => (
+                                            <p key={idx} className="text-sm text-red-800 dark:text-red-200">• {product}</p>
+                                        ))}
+                                        {productsWithLowStars.length > 3 && (
+                                            <p className="text-xs text-red-600 dark:text-red-400">+{productsWithLowStars.length - 3} more</p>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-red-700 dark:text-red-300">No products with low reviews</p>
+                                )}
                             </div>
                         </div>
 

@@ -92,7 +92,7 @@ const PaymentForm = ({ cartItems, shippingInfo, clearCart, orderInfo, stripeProm
             toast.error(error.response?.data?.message || 'Failed to create order', {
                 position: 'bottom-right'
             });
-        }
+           }
     };
 
     const submitHandler = async (e) => {

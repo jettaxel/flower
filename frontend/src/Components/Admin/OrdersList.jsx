@@ -182,6 +182,16 @@ const OrdersList = () => {
         status: order.orderStatus,
     }));
 
+    // Calculate order statistics
+    const orderStats = {
+        total: allOrders.length,
+        pending: allOrders.filter(o => o.orderStatus === 'Pending').length,
+        processing: allOrders.filter(o => o.orderStatus === 'Processing').length,
+        shipped: allOrders.filter(o => o.orderStatus === 'Shipped').length,
+        delivered: allOrders.filter(o => o.orderStatus === 'Delivered').length,
+        cancelled: allOrders.filter(o => o.orderStatus === 'Cancelled').length,
+    };
+
     return (
         <>
             <MetaData title={'All Orders'} />
@@ -199,6 +209,45 @@ const OrdersList = () => {
                                 <p className="text-sm text-gray-600 dark:text-ink-muted">
                                     Review and manage every order placed in your store.
                                 </p>
+                            </div>
+                        </div>
+
+                        {/* Order Statistics Cards */}
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+                            <div className="bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-purple-100 mb-1">Total Orders</p>
+                                <p className="text-2xl font-bold">{orderStats.total}</p>
+                                <Link to="/admin/orders" className="text-xs text-purple-100 hover:underline mt-1 block">View orders</Link>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-yellow-100 mb-1">Pending</p>
+                                <p className="text-2xl font-bold">{orderStats.pending}</p>
+                                <p className="text-xs text-yellow-100 mt-1">Awaiting processing</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-blue-100 mb-1">Processing</p>
+                                <p className="text-2xl font-bold">{orderStats.processing}</p>
+                                <p className="text-xs text-blue-100 mt-1">In progress</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-indigo-100 mb-1">Shipped</p>
+                                <p className="text-2xl font-bold">{orderStats.shipped}</p>
+                                <p className="text-xs text-indigo-100 mt-1">On the way</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-green-100 mb-1">Delivered</p>
+                                <p className="text-2xl font-bold">{orderStats.delivered}</p>
+                                <p className="text-xs text-green-100 mt-1">Completed</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-red-500 to-rose-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-red-100 mb-1">Cancelled</p>
+                                <p className="text-2xl font-bold">{orderStats.cancelled}</p>
+                                <p className="text-xs text-red-100 mt-1">Cancelled orders</p>
                             </div>
                         </div>
 

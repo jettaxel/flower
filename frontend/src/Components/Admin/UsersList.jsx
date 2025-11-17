@@ -418,46 +418,57 @@ const UsersList = () => {
                             )}
                         </div>
 
-                        {/* Stats */}
-                        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="bg-gradient-to-br from-purple-500 to-indigo-500 dark:from-purple-400 dark:to-indigo-400 rounded-xl p-6 text-white shadow-lg">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-purple-100 text-sm font-medium">Total Users</p>
-                                        <p className="text-3xl font-bold mt-1">{allUsers.length}</p>
-                                    </div>
-                                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                                        <span className="text-2xl">👥</span>
-                                    </div>
-                                </div>
+                        {/* User Statistics Cards */}
+                        <div className="mb-6 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                            <div className="bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-purple-100 mb-1">Total Users</p>
+                                <p className="text-2xl font-bold">{allUsers.length}</p>
+                                <Link to="/admin/users" className="text-xs text-purple-100 hover:underline mt-1 block">Manage users</Link>
                             </div>
 
-                            <div className="bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl p-6 text-white shadow-lg">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-green-100 text-sm font-medium">Regular Users</p>
-                                        <p className="text-3xl font-bold mt-1">
-                                            {allUsers.filter(u => u.role === 'user').length}
-                                        </p>
-                                    </div>
-                                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                                        <span className="text-2xl">👤</span>
-                                    </div>
-                                </div>
+                            <div className="bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-green-100 mb-1">Regular Users</p>
+                                <p className="text-2xl font-bold">
+                                    {allUsers.filter(u => u.role === 'user').length}
+                                </p>
+                                <p className="text-xs text-green-100 mt-1">Customer accounts</p>
                             </div>
 
-                            <div className="bg-gradient-to-br from-red-500 to-rose-500 rounded-xl p-6 text-white shadow-lg">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-red-100 text-sm font-medium">Administrators</p>
-                                        <p className="text-3xl font-bold mt-1">
-                                            {allUsers.filter(u => u.role === 'admin').length}
-                                        </p>
-                                    </div>
-                                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                                        <span className="text-2xl">🔐</span>
-                                    </div>
-                                </div>
+                            <div className="bg-gradient-to-br from-red-500 to-rose-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-red-100 mb-1">Administrators</p>
+                                <p className="text-2xl font-bold">
+                                    {allUsers.filter(u => u.role === 'admin').length}
+                                </p>
+                                <p className="text-xs text-red-100 mt-1">Admin accounts</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-blue-100 mb-1">Active Users</p>
+                                <p className="text-2xl font-bold">
+                                    {allUsers.filter(u => u.isActive !== false).length}
+                                </p>
+                                <p className="text-xs text-blue-100 mt-1">Currently active</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-gray-500 to-slate-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-gray-100 mb-1">Inactive Users</p>
+                                <p className="text-2xl font-bold">
+                                    {allUsers.filter(u => u.isActive === false).length}
+                                </p>
+                                <p className="text-xs text-gray-100 mt-1">Deactivated</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl p-4 text-white shadow-lg">
+                                <p className="text-sm font-medium text-orange-100 mb-1">New This Month</p>
+                                <p className="text-2xl font-bold">
+                                    {allUsers.filter(u => {
+                                        const userDate = new Date(u.createdAt);
+                                        const now = new Date();
+                                        return userDate.getMonth() === now.getMonth() && 
+                                               userDate.getFullYear() === now.getFullYear();
+                                    }).length}
+                                </p>
+                                <p className="text-xs text-orange-100 mt-1">Recent signups</p>
                             </div>
                         </div>
                     </div>
