@@ -114,7 +114,7 @@ const SalesRangeChart = () => {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
-                    <Tooltip formatter={(value) => [`₱${Number(value).toFixed(2)}`, 'Total Sales']} />
+                    <Tooltip formatter={(value) => [`$${Number(value).toFixed(2)}`, 'Total Sales']} />
                     <Legend />
                     <Bar dataKey="total" fill="#82ca9d" />
                 </BarChart>

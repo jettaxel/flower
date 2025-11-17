@@ -79,7 +79,7 @@ const PaymentForm = ({ cartItems, shippingInfo, clearCart, orderInfo, stripeProm
             if (typeof clearCart === 'function') {
                 clearCart();
             }
-            
+           
             sessionStorage.removeItem('orderInfo');
             navigate('/success');
     
@@ -161,7 +161,7 @@ const PaymentForm = ({ cartItems, shippingInfo, clearCart, orderInfo, stripeProm
 
                 if (paymentIntent.status === 'succeeded') {
                     // Payment successful - create order
-                    order.paymentInfo = {
+        order.paymentInfo = {
                         id: paymentIntent.id,
                         status: paymentIntent.status
                     };
@@ -318,8 +318,8 @@ const PaymentForm = ({ cartItems, shippingInfo, clearCart, orderInfo, stripeProm
                 {loading 
                     ? 'Processing...' 
                     : paymentMethod === 'cod' 
-                        ? `Place Order (COD) - ₱${orderInfo && orderInfo.totalPrice}` 
-                        : `Pay - ₱${orderInfo && orderInfo.totalPrice}`
+                        ? `Place Order (COD) - $${orderInfo && orderInfo.totalPrice}` 
+                        : `Pay - $${orderInfo && orderInfo.totalPrice}`
                 }
             </Button>
         </form>

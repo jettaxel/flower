@@ -250,7 +250,7 @@ const ListOrders = () => {
         id: order._id,
         preview: order.orderItems && order.orderItems[0] ? order.orderItems[0].image : '',
         numOfItems: order.orderItems.length,
-        amount: `₱${order.totalPrice}`,
+        amount: `$${order.totalPrice}`,
         status: order.orderStatus || ''
     }));
 

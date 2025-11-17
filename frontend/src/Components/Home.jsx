@@ -54,7 +54,7 @@ const Home = () => {
     setPrice(newValue);
   };
   
-  const valuetext = (price) => `₱${price}`;
+  const valuetext = (price) => `$${price}`;
 
   const getProducts = async (keyword = '', page = 1, priceRange, category = '', rating = 0, append = false) => {
     try {
@@ -216,7 +216,7 @@ const Home = () => {
                       <h4 className="text-white font-semibold text-lg mb-2">{product.name}</h4>
                       <p className="text-white/80 text-sm mb-3">{product.category}</p>
                       <span className="text-white font-bold text-xl mb-3">
-                        ₱{product.price.toFixed(2)}
+                        ${product.price.toFixed(2)}
                       </span>
                       <a
                         href={`/product/${product._id}`}
@@ -393,9 +393,9 @@ const Home = () => {
                   />
                 </Box>
                 <div className="text-base font-medium text-gray-700 dark:text-ink mt-4 flex justify-between items-center">
-                  <span className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-lg">₱{price[0].toLocaleString()}</span>
+                  <span className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-lg">${price[0].toLocaleString()}</span>
                   <span className="text-gray-400 dark:text-gray-500">to</span>
-                  <span className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-lg">₱{price[1].toLocaleString()}</span>
+                  <span className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-lg">${price[1].toLocaleString()}</span>
                 </div>
               </div>
 

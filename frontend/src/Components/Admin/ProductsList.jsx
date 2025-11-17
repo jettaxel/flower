@@ -182,7 +182,7 @@ const ProductsList = () => {
             headerName: '💰 Price',
             width: 120,
             renderCell: (params) => (
-                <span className="font-semibold text-green-600 dark:text-green-400">₱{params.value}</span>
+                <span className="font-semibold text-green-600 dark:text-green-400">${params.value}</span>
             )
         },
         {

@@ -188,9 +188,9 @@ const createCancelledEmailTemplate = (order, user) => {
     const orderItemsHtml = order.orderItems.map(item => `
         <tr>
             <td>${item.name}</td>
-            <td>₱${item.price}</td>
+            <td>$${item.price}</td>
             <td>${item.quantity} Piece(s)</td>
-            <td>₱${(item.price * item.quantity).toFixed(2)}</td>
+            <td>$${(item.price * item.quantity).toFixed(2)}</td>
         </tr>
     `).join('');
     
@@ -225,7 +225,7 @@ const createCancelledEmailTemplate = (order, user) => {
                     <p><strong>Order ID:</strong> ${order._id}</p>
                     <p><strong>Order Status:</strong> <span style="color: #dc2626;">Cancelled</span></p>
                     <p><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}</p>
-                    <p><strong>Total Amount:</strong> ₱${order.totalPrice}</p>
+                    <p><strong>Total Amount:</strong> $${order.totalPrice}</p>
                     
                     <h4>Order Items:</h4>
                     <table class="items-table">

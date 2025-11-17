@@ -173,7 +173,7 @@ const Dashboard = () => {
                                         <div className="flex items-center justify-between mb-4">
                                             <h2 className="text-lg font-semibold text-gray-900 dark:text-ink">Revenue Overview</h2>
                                             <span className="text-sm text-gray-500 dark:text-ink-muted">
-                                                Total revenue: ₱{totalAmount.toFixed(2)}
+                                                Total revenue: ${totalAmount.toFixed(2)}
                                             </span>
                                         </div>
                                         <div className="rounded-xl bg-gradient-to-r from-purple-50 via-indigo-50 to-sky-50 dark:from-purple-950/40 dark:via-indigo-950/40 dark:to-sky-950/40 p-4 flex items-center justify-between">
@@ -182,7 +182,7 @@ const Dashboard = () => {
                                                     Lifetime revenue
                                                 </p>
                                                 <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-ink">
-                                                    ₱{totalAmount.toFixed(2)}
+                                                    ${totalAmount.toFixed(2)}
                                                 </p>
                                             </div>
                                             <div className="text-4xl">

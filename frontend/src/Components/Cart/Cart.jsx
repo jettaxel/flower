@@ -72,7 +72,7 @@ const Cart = ({ addItemToCart, removeItemFromCart, cartItems }) => {
                   </div>
 
                   {/* Price */}
-                  <div className="text-[#6B5B4A] font-medium mt-2 sm:mt-0">₱{item.price}</div>
+                  <div className="text-[#6B5B4A] font-medium mt-2 sm:mt-0">${item.price}</div>
 
                   {/* Quantity Controls */}
                   <div className="flex items-center gap-2 mt-3 sm:mt-0">
@@ -123,7 +123,7 @@ const Cart = ({ addItemToCart, removeItemFromCart, cartItems }) => {
               <p className="flex justify-between text-[#4A3F35] mb-6">
                 Est. Total:
                 <span className="font-bold text-[#C89B6D]">
-                  ₱
+                  $
                   {cartItems
                     .reduce((acc, item) => acc + item.quantity * item.price, 0)
                     .toFixed(2)}

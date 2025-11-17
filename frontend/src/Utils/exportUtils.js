@@ -100,7 +100,7 @@ export const exportProductsToPDF = async (products) => {
             const rowData = [
                 (product.name || 'N/A').substring(0, 28), // Truncate long names
                 (product.category || 'N/A').substring(0, 15),
-                `PHP ${formattedPrice}`,
+                `$${formattedPrice}`,
                 (product.stock || 0).toString(),
                 (product.ratings || 0).toFixed(1),
                 (product.numOfReviews || 0).toString()

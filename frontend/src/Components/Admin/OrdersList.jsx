@@ -178,7 +178,7 @@ const OrdersList = () => {
         id: order._id,
         customer: order.user && order.user.name,
         numofItems: order.orderItems.length,
-        amount: `₱${order.totalPrice}`,
+        amount: `$${order.totalPrice}`,
         status: order.orderStatus,
     }));
 

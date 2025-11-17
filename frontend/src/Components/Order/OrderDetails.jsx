@@ -306,7 +306,7 @@ const OrderDetails = () => {
                                 </div>
                                 <div className="mt-4">
                                     <p className="text-xs font-medium text-gray-500 dark:text-ink-muted mb-1">Total Amount</p>
-                                    <p className="text-2xl font-bold text-gray-900 dark:text-ink">₱{totalPrice}</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-ink">${totalPrice}</p>
                                 </div>
                             </div>
                         </div>
@@ -325,7 +325,7 @@ const OrderDetails = () => {
                                                 {item.name}
                                             </Link>
                                             <div className="mt-1 text-xs text-gray-500 dark:text-ink-muted">
-                                                <span>₱{item.price}</span>
+                                                <span>${item.price}</span>
                                                 <span className="mx-1">•</span>
                                                 <span>{item.quantity} piece(s)</span>
                                             </div>

@@ -102,15 +102,15 @@ const ConfirmOrder = ({cartItems, shippingInfo}) => {
                             <Box className="space-y-2 text-sm text-gray-700 dark:text-ink">
                                 <Box className="flex justify-between">
                                     <span>Subtotal:</span>
-                                    <span className="font-medium">₱{itemsPrice}</span>
+                                    <span className="font-medium">${itemsPrice}</span>
                                 </Box>
                                 <Box className="flex justify-between">
                                     <span>Shipping:</span>
-                                    <span className="font-medium">₱{shippingPrice}</span>
+                                    <span className="font-medium">${shippingPrice}</span>
                                 </Box>
                                 <Box className="flex justify-between">
                                     <span>Tax:</span>
-                                    <span className="font-medium">₱{taxPrice}</span>
+                                    <span className="font-medium">${taxPrice}</span>
                                 </Box>
                             </Box>
 
@@ -118,7 +118,7 @@ const ConfirmOrder = ({cartItems, shippingInfo}) => {
 
                             <Box className="flex justify-between items-center mb-4 text-sm text-gray-900 dark:text-ink">
                                 <span className="font-semibold">Total:</span>
-                                <span className="font-bold text-lg">₱{totalPrice}</span>
+                                <span className="font-bold text-lg">${totalPrice}</span>
                             </Box>
 
                             <Button

@@ -393,7 +393,7 @@ const ProductDetails = ({ addItemToCart, cartItems }) => {
 
             {/* Price */}
             <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-4">
-              ₱{product.price ? Number(product.price).toFixed(2) : "0.00"}
+              ${product.price ? Number(product.price).toFixed(2) : "0.00"}
             </p>
 
             {/* Stock status */}

@@ -62,7 +62,7 @@ export default function MonthlySalesChart() {
                     <CartesianGrid stroke="#e0e0e0" strokeDasharray="4 4" />
                     <XAxis dataKey="month" />
                     <YAxis />
-                    <Tooltip formatter={(value) => [`₱${Number(value).toFixed(2)}`, 'Total Sales']} />
+                    <Tooltip formatter={(value) => [`$${Number(value).toFixed(2)}`, 'Total Sales']} />
                     <Line
                         type="monotone"
                         dataKey="total"

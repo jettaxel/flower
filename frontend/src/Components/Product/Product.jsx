@@ -21,7 +21,7 @@ const Product = ({ product }) => {
           </div>
           <span className="reviews">({product.numOfReviews} reviews)</span>
         </div>
-        <p className="price">₱{product.price}</p>
+        <p className="price">${product.price}</p>
         <Link to={`/product/${product._id}`} className="view-btn">
           View Details
         </Link>
