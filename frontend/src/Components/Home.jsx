@@ -20,6 +20,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [filteredProductsCount, setFilteredProductsCount] = useState(0);
   const [price, setPrice] = useState([1, 10000]);
+  const [priceFilter, setPriceFilter] = useState([1, 10000]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showScroll, setShowScroll] = useState(false);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
@@ -42,7 +43,17 @@ const Home = () => {
   // Use filteredProductsCount when there's a keyword, category, or rating filter
   let count = (keyword || selectedCategory || minRating > 0) ? filteredProductsCount : productsCount;
 
-  const handleChange = (event, newValue) => setPrice(newValue);
+  const handleChange = (event, newValue) => {
+    // Update visual slider immediately for smooth interaction
+    setPrice(newValue);
+  };
+  
+  const handlePriceChangeCommitted = (event, newValue) => {
+    // Update the actual filter when user releases the slider
+    setPriceFilter(newValue);
+    setPrice(newValue);
+  };
+  
   const valuetext = (price) => `₱${price}`;
 
   const getProducts = async (keyword = '', page = 1, priceRange, category = '', rating = 0, append = false) => {
@@ -78,14 +89,15 @@ const Home = () => {
   };
 
   useEffect(() => {
-    setCurrentPage(1); // Reset to first page when filters change
+    // Only reset when price filter is committed (not during dragging)
+    setCurrentPage(1);
     setProducts([]);
-  }, [price, selectedCategory, minRating, keyword]);
+  }, [priceFilter, selectedCategory, minRating, keyword]);
 
   useEffect(() => {
     const append = viewMode === 'infinite' && currentPage > 1;
-    getProducts(keyword, currentPage, price, selectedCategory, minRating, append);
-  }, [keyword, currentPage, price, selectedCategory, minRating, viewMode]);
+    getProducts(keyword, currentPage, priceFilter, selectedCategory, minRating, append);
+  }, [keyword, currentPage, priceFilter, selectedCategory, minRating, viewMode]);
 
   // Scroll to top button visibility + infinite scroll
   useEffect(() => {
@@ -304,7 +316,8 @@ const Home = () => {
             onClose={() => setFilterDrawerOpen(false)}
             PaperProps={{
               sx: {
-                width: { xs: '85%', sm: '400px' },
+                width: { xs: '90%', sm: '420px', md: '450px' },
+                maxWidth: '450px',
                 backgroundColor: 'rgb(250, 245, 255)',
                 '@media (prefers-color-scheme: dark)': {
                   backgroundColor: 'rgb(30, 30, 35)',
@@ -312,16 +325,16 @@ const Home = () => {
               },
             }}
           >
-            <div className="h-full bg-purple-50 dark:bg-base-soft p-6 overflow-y-auto">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-ink tracking-wide flex items-center space-x-2">
+            <div className="h-full bg-purple-50 dark:bg-base-soft p-6 md:p-8 overflow-y-auto">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-2xl font-semibold text-gray-900 dark:text-ink tracking-wide flex items-center space-x-2">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
                     strokeWidth="1.8"
                     stroke="#a78bfa"
-                    className="w-5 h-5"
+                    className="w-6 h-6"
                   >
                     <path
                       strokeLinecap="round"
@@ -335,62 +348,79 @@ const Home = () => {
                   onClick={() => setFilterDrawerOpen(false)}
                   className="!text-gray-600 dark:!text-ink-muted hover:!bg-purple-200 dark:hover:!bg-purple-900/30"
                   aria-label="close filters"
+                  size="large"
                 >
                   <CloseIcon />
                 </IconButton>
               </div>
 
-              <div className="bg-white dark:bg-base-dark p-4 rounded-xl shadow-sm border border-purple-200 dark:border-purple-500/20 mb-6">
-                <h4 className="text-sm font-medium text-gray-900 dark:text-ink mb-2 uppercase tracking-wide">
+              <div className="bg-white dark:bg-base-dark p-5 md:p-6 rounded-xl shadow-sm border border-purple-200 dark:border-purple-500/20 mb-6">
+                <h4 className="text-base font-semibold text-gray-900 dark:text-ink mb-4 uppercase tracking-wide">
                   Price Range
                 </h4>
-                <Box sx={{ width: '100%' }}>
+                <Box sx={{ width: '100%', px: 1 }}>
                   <Slider
                     getAriaLabel={() => 'Price Filter'}
                     value={price}
                     onChange={handleChange}
+                    onChangeCommitted={handlePriceChangeCommitted}
                     valueLabelDisplay="on"
                     getAriaValueText={valuetext}
                     min={1}
                     max={10000}
                     sx={{
                       color: '#a78bfa',
-                      '& .MuiSlider-thumb': { border: '2px solid #8b5cf6' },
+                      height: 8,
+                      '& .MuiSlider-thumb': { 
+                        border: '2px solid #8b5cf6',
+                        width: 20,
+                        height: 20,
+                      },
                       '& .MuiSlider-valueLabel': {
                         backgroundColor: '#8b5cf6',
                         color: '#ffffff',
+                        fontSize: '0.75rem',
+                        padding: '4px 8px',
+                      },
+                      '& .MuiSlider-track': {
+                        height: 6,
+                      },
+                      '& .MuiSlider-rail': {
+                        height: 6,
+                        opacity: 0.3,
                       },
                     }}
                   />
                 </Box>
-                <div className="text-sm text-gray-600 dark:text-ink-muted mt-2 flex justify-between">
-                  <span>₱{price[0]}</span>
-                  <span>₱{price[1]}</span>
+                <div className="text-base font-medium text-gray-700 dark:text-ink mt-4 flex justify-between items-center">
+                  <span className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-lg">₱{price[0].toLocaleString()}</span>
+                  <span className="text-gray-400 dark:text-gray-500">to</span>
+                  <span className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-lg">₱{price[1].toLocaleString()}</span>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-base-dark p-4 rounded-xl shadow-sm border border-purple-200 dark:border-purple-500/20 mb-6">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-ink uppercase tracking-wide">
+              <div className="bg-white dark:bg-base-dark p-5 md:p-6 rounded-xl shadow-sm border border-purple-200 dark:border-purple-500/20 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-base font-semibold text-gray-900 dark:text-ink uppercase tracking-wide">
                     Minimum Rating
                   </h4>
                   {minRating > 0 && (
                     <button
                       onClick={() => setMinRating(0)}
-                      className="text-xs text-purple-600 dark:text-purple-400 hover:underline"
+                      className="text-sm text-purple-600 dark:text-purple-400 hover:underline font-medium"
                     >
                       Clear
                     </button>
                   )}
                 </div>
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2.5 mb-4 flex-wrap">
                   {[1, 2, 3, 4, 5].map((rating) => (
                     <button
                       key={rating}
                       onClick={() => setMinRating(rating === minRating ? 0 : rating)}
-                      className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 ${
+                      className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg transition-all duration-200 ${
                         minRating >= rating
-                          ? 'bg-yellow-400 text-yellow-900'
+                          ? 'bg-yellow-400 text-yellow-900 shadow-md'
                           : 'bg-gray-100 dark:bg-base-dark text-gray-400 hover:bg-gray-200 dark:hover:bg-purple-900/30'
                       }`}
                       aria-label={`${rating} star${rating > 1 ? 's' : ''} and up`}
@@ -409,26 +439,26 @@ const Home = () => {
                           d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l2.09 6.418a1 1 0 00.95.69h6.75c.969 0 1.371 1.24.588 1.81l-5.47 3.974a1 1 0 00-.364 1.118l2.09 6.418c.3.921-.755 1.688-1.54 1.118l-5.47-3.974a1 1 0 00-1.176 0l-5.47 3.974c-.785.57-1.84-.197-1.54-1.118l2.09-6.418a1 1 0 00-.364-1.118L2.67 11.845c-.783-.57-.38-1.81.588-1.81h6.75a1 1 0 00.95-.69l2.09-6.418z"
                         />
                       </svg>
-                      <span className="text-sm font-medium">{rating}+</span>
+                      <span className="text-sm font-semibold">{rating}+</span>
                     </button>
                   ))}
                 </div>
                 {minRating > 0 && (
-                  <p className="text-xs text-gray-600 dark:text-ink-muted">
+                  <p className="text-sm text-gray-600 dark:text-ink-muted">
                     Showing products with {minRating}+ star{minRating > 1 ? 's' : ''} rating
                   </p>
                 )}
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-ink uppercase tracking-wide">
+              <div className="bg-white dark:bg-base-dark p-5 md:p-6 rounded-xl shadow-sm border border-purple-200 dark:border-purple-500/20">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-base font-semibold text-gray-900 dark:text-ink uppercase tracking-wide">
                     Categories
                   </h4>
                   {selectedCategory && (
                     <button
                       onClick={() => setSelectedCategory('')}
-                      className="text-xs text-purple-600 dark:text-purple-400 hover:underline"
+                      className="text-sm text-purple-600 dark:text-purple-400 hover:underline font-medium"
                     >
                       Clear
                     </button>
@@ -439,9 +469,9 @@ const Home = () => {
                     <li
                       key={category}
                       onClick={() => setSelectedCategory(category === selectedCategory ? '' : category)}
-                      className={`flex items-center space-x-2 cursor-pointer rounded-full py-2 px-4 text-sm transition-all duration-200 border shadow-sm ${
+                      className={`flex items-center space-x-3 cursor-pointer rounded-lg py-3 px-4 text-sm transition-all duration-200 border shadow-sm ${
                         selectedCategory === category
-                          ? 'bg-purple-500 text-white dark:bg-purple-600 border-purple-600 dark:border-purple-500'
+                          ? 'bg-purple-500 text-white dark:bg-purple-600 border-purple-600 dark:border-purple-500 shadow-md'
                           : 'bg-gray-100 text-gray-800 dark:bg-base-dark dark:text-ink hover:bg-purple-200 dark:hover:bg-purple-900/30 hover:text-gray-900 dark:hover:text-ink border-transparent hover:border-purple-400 dark:hover:border-purple-500/40'
                       }`}
                     >
@@ -451,7 +481,7 @@ const Home = () => {
                         viewBox="0 0 24 24"
                         strokeWidth={1.8}
                         stroke={selectedCategory === category ? "#ffffff" : "#a78bfa"}
-                        className="w-4 h-4"
+                        className="w-5 h-5"
                       >
                         <path
                           strokeLinecap="round"
@@ -459,7 +489,7 @@ const Home = () => {
                           d="M5 12h14M12 5l7 7-7 7"
                         />
                       </svg>
-                      <span>{category}</span>
+                      <span className="flex-1 font-medium">{category}</span>
                       {selectedCategory === category && (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -467,7 +497,7 @@ const Home = () => {
                           viewBox="0 0 24 24"
                           strokeWidth={2}
                           stroke="currentColor"
-                          className="w-4 h-4 ml-auto"
+                          className="w-5 h-5"
                         >
                           <path
                             strokeLinecap="round"
