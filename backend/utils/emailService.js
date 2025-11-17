@@ -256,6 +256,148 @@ const createProcessingEmailTemplate = (order, user) => {
     `;
 };
 
+// Send password reset email
+const sendEmail = async ({ email, subject, message }) => {
+    try {
+        const transporter = createTransporter();
+        
+        const mailOptions = {
+            from: `${process.env.SMTP_FROM_NAME} <${process.env.SMTP_FROM_EMAIL}>`,
+            to: email,
+            subject: subject,
+            html: message
+        };
+        
+        const result = await transporter.sendMail(mailOptions);
+        console.log('Password reset email sent successfully:', result.messageId);
+        return { success: true, messageId: result.messageId };
+        
+    } catch (error) {
+        console.error('Error sending password reset email:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+// Create password reset email template
+const createPasswordResetEmailTemplate = (resetUrl, userName) => {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body { 
+                font-family: Arial, sans-serif; 
+                line-height: 1.6; 
+                color: #333; 
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f4;
+            }
+            .container { 
+                max-width: 600px; 
+                margin: 20px auto; 
+                background: white;
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+            .header { 
+                background: linear-gradient(135deg, #a855f7, #6366f1); 
+                color: white; 
+                padding: 30px 20px; 
+                text-align: center; 
+            }
+            .header h1 {
+                margin: 0;
+                font-size: 24px;
+            }
+            .content { 
+                padding: 30px 20px; 
+                background: #ffffff; 
+            }
+            .button-container {
+                text-align: center;
+                margin: 30px 0;
+            }
+            .reset-button {
+                display: inline-block;
+                padding: 14px 30px;
+                background: linear-gradient(135deg, #a855f7, #6366f1);
+                color: white;
+                text-decoration: none;
+                border-radius: 25px;
+                font-weight: bold;
+                font-size: 16px;
+                box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+            }
+            .reset-button:hover {
+                opacity: 0.9;
+            }
+            .link-container {
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 5px;
+                margin: 20px 0;
+                word-break: break-all;
+            }
+            .footer { 
+                text-align: center; 
+                padding: 20px; 
+                color: #666; 
+                background: #f8f9fa;
+                font-size: 12px;
+            }
+            .warning {
+                background: #fff3cd;
+                border-left: 4px solid #ffc107;
+                padding: 15px;
+                margin: 20px 0;
+                border-radius: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🔐 Password Reset Request</h1>
+            </div>
+            <div class="content">
+                <p>Hi ${userName || 'there'},</p>
+                <p>We received a request to reset your password for your Botany & Co account. Click the button below to reset your password:</p>
+                
+                <div class="button-container">
+                    <a href="${resetUrl}" class="reset-button">Reset Password</a>
+                </div>
+                
+                <p>Or copy and paste this link into your browser:</p>
+                <div class="link-container">
+                    ${resetUrl}
+                </div>
+                
+                <div class="warning">
+                    <strong>⚠️ Important:</strong>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li>This link will expire in 30 minutes</li>
+                        <li>If you didn't request this, please ignore this email</li>
+                        <li>Your password will not change until you click the link above</li>
+                    </ul>
+                </div>
+                
+                <p>If you're having trouble clicking the button, copy and paste the URL above into your web browser.</p>
+            </div>
+            <div class="footer">
+                <p>This is an automated message, please do not reply to this email.</p>
+                <p>&copy; ${new Date().getFullYear()} Botany & Co. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+};
+
 module.exports = {
-    sendOrderStatusEmail
+    sendOrderStatusEmail,
+    sendEmail,
+    createPasswordResetEmailTemplate
 };
