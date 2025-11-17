@@ -22,6 +22,7 @@ const ListOrders = () => {
     const [error, setError] = useState('')
     const [myOrdersList, setMyOrdersList] = useState([])
     const [updatingId, setUpdatingId] = useState(null)
+    const [cancellingId, setCancellingId] = useState(null)
 
     const myOrders = async () => {
         try {
@@ -48,6 +49,43 @@ const ListOrders = () => {
             });
         }
     }, [error])
+
+    const cancelOrder = async (id) => {
+        if (!window.confirm('Are you sure you want to cancel this order?')) {
+            return;
+        }
+
+        try {
+            setCancellingId(id);
+
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                }
+            }
+
+            const { data } = await axios.put(
+                `${import.meta.env.VITE_API}/order/${id}/cancel`,
+                {},
+                config
+            );
+
+            toast.success(data.message || 'Order cancelled successfully', {
+                position: 'bottom-right'
+            });
+
+            // Refresh orders list
+            myOrders();
+        } catch (error) {
+            const message = error?.response?.data?.message || 'Failed to cancel order';
+            toast.error(message, {
+                position: 'bottom-right'
+            });
+        } finally {
+            setCancellingId(null);
+        }
+    }
 
     const markOrderDelivered = async (id) => {
         try {
@@ -164,19 +202,47 @@ const ListOrders = () => {
         {
             field: 'actions',
             headerName: 'Actions',
-            width: 120,
+            width: 200,
             sortable: false,
             filterable: false,
-            renderCell: (params) => (
-                <Button
-                    component={Link}
-                    to={`/order/${params.id}`}
-                    variant="contained"
-                    size="small"
-                >
-                    <i className="fa fa-eye" />
-                </Button>
-            )
+            renderCell: (params) => {
+                const order = myOrdersList.find(o => o._id === params.id);
+                const canCancel = order && !['Processing', 'Shipped', 'Delivered', 'Cancelled'].includes(order.orderStatus);
+                
+                return (
+                    <div className="flex items-center gap-2">
+                        <Button
+                            component={Link}
+                            to={`/order/${params.id}`}
+                            variant="contained"
+                            size="small"
+                            sx={{ minWidth: 'auto', px: 1 }}
+                        >
+                            <i className="fa fa-eye" />
+                        </Button>
+                        {canCancel && (
+                            <Button
+                                variant="contained"
+                                color="error"
+                                size="small"
+                                disabled={cancellingId === params.id}
+                                onClick={() => cancelOrder(params.id)}
+                                sx={{ minWidth: 'auto', px: 2 }}
+                                title="Cancel Order"
+                            >
+                                {cancellingId === params.id ? (
+                                    <span className="text-xs">...</span>
+                                ) : (
+                                    <>
+                                        <i className="fa fa-times mr-1" />
+                                        <span className="text-xs">Cancel</span>
+                                    </>
+                                )}
+                            </Button>
+                        )}
+                    </div>
+                );
+            }
         }
     ];
 

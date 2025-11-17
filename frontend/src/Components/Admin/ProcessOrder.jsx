@@ -17,6 +17,7 @@ const ProcessOrder = () => {
     const [error, setError] = useState('')
     const [order, setOrder] = useState({})
     const [isUpdated, setIsUpdated] = useState(false)
+    const [cancelling, setCancelling] = useState(false)
     let navigate = useNavigate()
 
     let { id } = useParams();
@@ -85,6 +86,38 @@ const ProcessOrder = () => {
         }
     }, [error, isUpdated, orderId])
 
+    const cancelOrder = async () => {
+        if (!window.confirm('Are you sure you want to cancel this order?')) {
+            return;
+        }
+
+        try {
+            setCancelling(true);
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                }
+            }
+
+            const { data } = await axios.put(
+                `${import.meta.env.VITE_API}/admin/order/${order._id}/cancel`,
+                {},
+                config
+            );
+
+            successMsg(data.message || 'Order cancelled successfully');
+            
+            // Refresh order details
+            getOrderDetails(order._id);
+        } catch (error) {
+            const message = error?.response?.data?.message || 'Failed to cancel order';
+            errMsg(message);
+        } finally {
+            setCancelling(false);
+        }
+    }
+
     const updateOrderHandler = (id) => {
         const formData = new FormData();
         formData.set('status', status);
@@ -117,7 +150,15 @@ const ProcessOrder = () => {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-ink-muted">Status</span>
-                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${order.orderStatus && String(order.orderStatus).includes('Delivered') ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200' : order.orderStatus && String(order.orderStatus).includes('Shipped') ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200' : 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-200'}`}>
+                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                            order.orderStatus && String(order.orderStatus).includes('Delivered') 
+                                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200'
+                                                : order.orderStatus && String(order.orderStatus).includes('Cancelled')
+                                                ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-200'
+                                                : order.orderStatus && String(order.orderStatus).includes('Shipped')
+                                                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200'
+                                                : 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-200'
+                                        }`}>
                                             {orderStatus}
                                         </span>
                                     </div>
@@ -143,8 +184,15 @@ const ProcessOrder = () => {
                                             <p className={`text-sm font-semibold ${isPaid ? 'text-emerald-600 dark:text-emerald-300' : 'text-red-600 dark:text-red-300'}`}>
                                                 {isPaid ? 'PAID' : 'NOT PAID'}
                                             </p>
+                                            {order.paymentMethod && (
+                                                <p className="text-xs text-gray-600 dark:text-ink-muted mt-1">
+                                                    Method: <span className="font-medium capitalize">{order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Card'}</span>
+                                                </p>
+                                            )}
                                             <div className="mt-3">
-                                                <p className="text-xs font-medium text-gray-500 dark:text-ink-muted mb-1">Stripe ID</p>
+                                                <p className="text-xs font-medium text-gray-500 dark:text-ink-muted mb-1">
+                                                    {order.paymentMethod === 'cod' ? 'Payment ID' : 'Stripe ID'}
+                                                </p>
                                                 <p className="text-xs text-gray-700 dark:text-ink break-all">{paymentInfo && paymentInfo.id}</p>
                                             </div>
                                         </div>
@@ -175,7 +223,7 @@ const ProcessOrder = () => {
                                     </div>
 
                                     <div className="lg:mt-0 mt-2">
-                                        <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-md border border-purple-100 dark:border-purple-500/30 p-5">
+                                        <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-md border border-purple-100 dark:border-purple-500/30 p-5 space-y-4">
                                             <h4 className="text-sm font-semibold text-gray-900 dark:text-ink mb-3">Update Status</h4>
                                             <div className="mb-4">
                                                 <label className="block text-xs font-medium text-gray-600 dark:text-ink-muted mb-1">Next status</label>
@@ -184,6 +232,7 @@ const ProcessOrder = () => {
                                                     name='status'
                                                     value={status}
                                                     onChange={(e) => setStatus(e.target.value)}
+                                                    disabled={order.orderStatus === 'Cancelled'}
                                                 >
                                                     <option value="">Select status</option>
                                                     <option value="Processing">Processing</option>
@@ -194,7 +243,7 @@ const ProcessOrder = () => {
                                             <button
                                                 className="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-sm font-semibold shadow-md hover:opacity-90 transition disabled:opacity-60"
                                                 onClick={() => updateOrderHandler(order._id)}
-                                                disabled={updating || !status}
+                                                disabled={updating || !status || order.orderStatus === 'Cancelled'}
                                             >
                                                 {updating ? (
                                                     <>
@@ -208,6 +257,23 @@ const ProcessOrder = () => {
                                                     'Update Status'
                                                 )}
                                             </button>
+                                            
+                                            {order.orderStatus && !['Processing', 'Shipped', 'Delivered', 'Cancelled'].includes(order.orderStatus) && (
+                                                <button
+                                                    className="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold shadow-md transition disabled:opacity-60"
+                                                    onClick={cancelOrder}
+                                                    disabled={cancelling}
+                                                >
+                                                    {cancelling ? (
+                                                        <>
+                                                            <span className="mr-2 inline-block h-4 w-4 border-2 border-white/60 border-t-transparent rounded-full animate-spin" aria-hidden="true"></span>
+                                                            Cancelling...
+                                                        </>
+                                                    ) : (
+                                                        'Cancel Order'
+                                                    )}
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

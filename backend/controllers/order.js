@@ -16,11 +16,16 @@ exports.newOrder = async (req, res, next) => {
             taxPrice,
             shippingPrice,
             totalPrice,
-            paymentInfo
+            paymentInfo,
+            paymentMethod
 
         } = req.body;
 
-        const order = await Order.create({
+        // Determine order status based on payment method
+        const orderStatus = paymentMethod === 'cod' ? 'Pending' : 'Processing';
+        
+        // Only set paidAt for card payments
+        const orderData = {
             orderItems,
             shippingInfo,
             itemsPrice,
@@ -28,9 +33,17 @@ exports.newOrder = async (req, res, next) => {
             shippingPrice,
             totalPrice,
             paymentInfo,
-            paidAt: Date.now(),
+            paymentMethod: paymentMethod || 'card',
+            orderStatus,
             user: req.user._id
-        })
+        };
+
+        // Only set paidAt for card payments (COD is paid on delivery)
+        if (paymentMethod !== 'cod') {
+            orderData.paidAt = Date.now();
+        }
+
+        const order = await Order.create(orderData)
 
         // Populate order with product details for email
         const populatedOrder = await Order.findById(order._id).populate('orderItems.product');
@@ -132,6 +145,54 @@ exports.deleteOrder = async (req, res, next) => {
     })
 }
 
+exports.cancelOrder = async (req, res, next) => {
+    try {
+        const order = await Order.findById(req.params.id).populate('orderItems.product');
+        
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: 'Order not found'
+            });
+        }
+
+        // Check if order can be cancelled
+        const nonCancellableStatuses = ['Processing', 'Shipped', 'Delivered', 'Cancelled'];
+        if (nonCancellableStatuses.includes(order.orderStatus)) {
+            return res.status(400).json({
+                success: false,
+                message: `Cannot cancel order. Order is already ${order.orderStatus.toLowerCase()}.`
+            });
+        }
+
+        // Update order status to Cancelled
+        order.orderStatus = 'Cancelled';
+        await order.save();
+
+        // Get user information for email
+        const user = await User.findById(order.user);
+        if (user) {
+            // Send cancellation email notification
+            const { sendOrderStatusEmail } = require('../utils/emailService');
+            const emailResult = await sendOrderStatusEmail({ order, user }, null);
+            if (emailResult.success) {
+                console.log('Cancellation email sent successfully');
+            }
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Order cancelled successfully'
+        });
+    } catch (error) {
+        console.error('Error cancelling order:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error cancelling order'
+        });
+    }
+}
+
 exports.updateOrder = async (req, res, next) => {
     try {
         const order = await Order.findById(req.params.id).populate('orderItems.product');
@@ -148,6 +209,13 @@ exports.updateOrder = async (req, res, next) => {
             return res.status(400).json({
                 success: false,
                 message: 'You have already delivered this order'
+            });
+        }
+
+        if (order.orderStatus === 'Cancelled') {
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot update a cancelled order'
             });
         }
 
@@ -169,6 +237,14 @@ exports.updateOrder = async (req, res, next) => {
                 await updateStock(item.product, item.quantity)
             });
             order.deliveredAt = Date.now();
+            
+            // Mark as paid if COD order is delivered
+            if (order.paymentMethod === 'cod' && !order.paidAt) {
+                order.paidAt = Date.now();
+                if (order.paymentInfo) {
+                    order.paymentInfo.status = 'succeeded';
+                }
+            }
         }
 
         // Update order status

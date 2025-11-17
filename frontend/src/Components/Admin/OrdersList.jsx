@@ -16,6 +16,7 @@ const OrdersList = () => {
     const [error, setError] = useState('')
     const [allOrders, setAllOrders] = useState([])
     const [isDeleted, setIsDeleted] = useState(false)
+    const [cancellingId, setCancellingId] = useState(null)
     const errMsg = (message = '') => toast.error(message, {
         position: 'bottom-right'
     });
@@ -65,6 +66,39 @@ const OrdersList = () => {
             navigate('/admin/orders');
         }
     }, [error, isDeleted])
+    const cancelOrder = async (id) => {
+        if (!window.confirm('Are you sure you want to cancel this order?')) {
+            return;
+        }
+
+        try {
+            setCancellingId(id);
+
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                }
+            }
+
+            const { data } = await axios.put(
+                `${import.meta.env.VITE_API}/admin/order/${id}/cancel`,
+                {},
+                config
+            );
+
+            successMsg(data.message || 'Order cancelled successfully');
+
+            // Refresh orders list
+            listOrders();
+        } catch (error) {
+            const message = error?.response?.data?.message || 'Failed to cancel order';
+            errMsg(message);
+        } finally {
+            setCancellingId(null);
+        }
+    }
+
     const deleteOrderHandler = (id) => {
         deleteOrder(id)
     }
@@ -107,21 +141,37 @@ const OrdersList = () => {
         {
             field: 'actions',
             headerName: 'Actions',
-            width: 120,
+            width: 180,
             sortable: false,
             filterable: false,
-            renderCell: (params) => (
-
-                <>
-                    {console.log(params)}
-                    <Link to={`/admin/order/${params.id}`} className="btn btn-primary py-1 px-2">
-                        <i className="fa fa-eye"></i>
-                    </Link>
-                    <button className="btn btn-danger py-1 px-2 ml-2" onClick={() => deleteOrderHandler(params.id)}>
-                        <i className="fa fa-trash"></i>
-                    </button>
-                </>
-            )
+            renderCell: (params) => {
+                const order = allOrders.find(o => o._id === params.id);
+                const canCancel = order && !['Processing', 'Shipped', 'Delivered', 'Cancelled'].includes(order.orderStatus);
+                
+                return (
+                    <div className="flex items-center gap-2">
+                        <Link to={`/admin/order/${params.id}`} className="btn btn-primary py-1 px-2">
+                            <i className="fa fa-eye"></i>
+                        </Link>
+                        {canCancel && (
+                            <button 
+                                className="btn btn-warning py-1 px-2" 
+                                onClick={() => cancelOrder(params.id)}
+                                disabled={cancellingId === params.id}
+                            >
+                                {cancellingId === params.id ? (
+                                    <i className="fa fa-spinner fa-spin"></i>
+                                ) : (
+                                    <i className="fa fa-times"></i>
+                                )}
+                            </button>
+                        )}
+                        <button className="btn btn-danger py-1 px-2" onClick={() => deleteOrderHandler(params.id)}>
+                            <i className="fa fa-trash"></i>
+                        </button>
+                    </div>
+                );
+            }
         }
     ];
     const rows = allOrders.map(order => ({

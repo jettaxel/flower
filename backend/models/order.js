@@ -61,6 +61,11 @@ const orderSchema = mongoose.Schema({
             type: String
         }
     },
+    paymentMethod: {
+        type: String,
+        enum: ['card', 'cod'],
+        default: 'card'
+    },
     paidAt: {
         type: Date
     },
@@ -88,7 +93,8 @@ const orderSchema = mongoose.Schema({
     orderStatus: {
         type: String,
         required: true,
-        default: 'Processing'
+        enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+        default: 'Pending'
     },
     deliveredAt: {
         type: Date

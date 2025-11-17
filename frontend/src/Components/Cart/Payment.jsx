@@ -11,7 +11,8 @@ import { Box, Paper, TextField, Button, Typography, Divider } from '@mui/materia
 
 
 const Payment = ({cartItems, shippingInfo, clearCart}) => {
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
+    const [paymentMethod, setPaymentMethod] = useState('card')
     let navigate = useNavigate();
     useEffect(() => {
     }, [])
@@ -79,10 +80,22 @@ const Payment = ({cartItems, shippingInfo, clearCart}) => {
             payBtn.disabled = true;
         }
         setLoading(true);
-        order.paymentInfo = {
-            id: 'pi_1DpdYh2eZvKYlo2CYIynhU32',
-            status: 'succeeded'
+        
+        // Set payment info based on payment method
+        if (paymentMethod === 'cod') {
+            order.paymentInfo = {
+                id: 'cod',
+                status: 'pending'
+            }
+            order.paymentMethod = 'cod';
+        } else {
+            order.paymentInfo = {
+                id: 'pi_1DpdYh2eZvKYlo2CYIynhU32',
+                status: 'succeeded'
+            }
+            order.paymentMethod = 'card';
         }
+        
         // Wait for order creation to complete before navigating
         await createOrder(order)
       }
@@ -107,44 +120,124 @@ const Payment = ({cartItems, shippingInfo, clearCart}) => {
                         variant="body2"
                         className="text-center text-gray-600 dark:text-ink-muted mb-6"
                     >
-                        Securely confirm your order payment details
+                        Choose your payment method
                     </Typography>
 
                     <form onSubmit={submitHandler} className="space-y-5">
-                        <TextField
-                            id="card_num_field"
-                            label="Card Number"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                            size="medium"
-                        />
-
-                        <TextField
-                            id="card_exp_field"
-                            label="Card Expiry"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                            size="medium"
-                        />
-
-                        <TextField
-                            id="card_cvc_field"
-                            label="Card CVC"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                            size="medium"
-                        />
+                        {/* Payment Method Selection */}
+                        <div className="space-y-3">
+                            <Typography variant="subtitle2" className="text-gray-700 dark:text-ink font-medium">
+                                Payment Method
+                            </Typography>
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('card')}
+                                    className={`p-4 rounded-lg border-2 transition-all ${
+                                        paymentMethod === 'card'
+                                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                                            : 'border-gray-300 dark:border-gray-600 hover:border-purple-300'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <input
+                                            type="radio"
+                                            checked={paymentMethod === 'card'}
+                                            onChange={() => setPaymentMethod('card')}
+                                            className="w-4 h-4 text-purple-600"
+                                        />
+                                        <div className="flex-1">
+                                            <div className="font-semibold text-gray-900 dark:text-ink">Credit/Debit Card</div>
+                                            <div className="text-sm text-gray-600 dark:text-ink-muted">Pay securely with your card</div>
+                                        </div>
+                                        <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                        </svg>
+                                    </div>
+                                </button>
+                                
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('cod')}
+                                    className={`p-4 rounded-lg border-2 transition-all ${
+                                        paymentMethod === 'cod'
+                                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                                            : 'border-gray-300 dark:border-gray-600 hover:border-purple-300'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <input
+                                            type="radio"
+                                            checked={paymentMethod === 'cod'}
+                                            onChange={() => setPaymentMethod('cod')}
+                                            className="w-4 h-4 text-purple-600"
+                                        />
+                                        <div className="flex-1">
+                                            <div className="font-semibold text-gray-900 dark:text-ink">Cash on Delivery (COD)</div>
+                                            <div className="text-sm text-gray-600 dark:text-ink-muted">Pay when you receive your order</div>
+                                        </div>
+                                        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
 
                         <Divider className="my-2" />
+
+                        {/* Card Payment Fields - Only show if card is selected */}
+                        {paymentMethod === 'card' && (
+                            <>
+                                <TextField
+                                    id="card_num_field"
+                                    label="Card Number"
+                                    type="text"
+                                    fullWidth
+                                    variant="outlined"
+                                    size="medium"
+                                    placeholder="1234 5678 9012 3456"
+                                />
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <TextField
+                                        id="card_exp_field"
+                                        label="Card Expiry"
+                                        type="text"
+                                        fullWidth
+                                        variant="outlined"
+                                        size="medium"
+                                        placeholder="MM/YY"
+                                    />
+
+                                    <TextField
+                                        id="card_cvc_field"
+                                        label="Card CVC"
+                                        type="text"
+                                        fullWidth
+                                        variant="outlined"
+                                        size="medium"
+                                        placeholder="123"
+                                    />
+                                </div>
+                                <Divider className="my-2" />
+                            </>
+                        )}
+
+                        {paymentMethod === 'cod' && (
+                            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-500/30 rounded-lg">
+                                <p className="text-sm text-blue-700 dark:text-blue-300">
+                                    💡 <strong>Cash on Delivery:</strong> You will pay the total amount when you receive your order. No payment is required now.
+                                </p>
+                            </div>
+                        )}
 
                         <Button
                             id="pay_btn"
                             type="submit"
                             fullWidth
                             variant="contained"
+                            disabled={loading}
                             sx={{
                                 borderRadius: '999px',
                                 py: 1.4,
@@ -155,10 +248,18 @@ const Payment = ({cartItems, shippingInfo, clearCart}) => {
                                 '&:hover': {
                                     backgroundImage: 'linear-gradient(to right, #9333ea, #4f46e5)',
                                     boxShadow: '0 12px 30px rgba(76, 29, 149, 0.5)'
+                                },
+                                '&:disabled': {
+                                    opacity: 0.6
                                 }
                             }}
                         >
-                            Pay {` - ₱${orderInfo && orderInfo.totalPrice}`}
+                            {loading 
+                                ? 'Processing...' 
+                                : paymentMethod === 'cod' 
+                                    ? `Place Order (COD) - ₱${orderInfo && orderInfo.totalPrice}` 
+                                    : `Pay - ₱${orderInfo && orderInfo.totalPrice}`
+                            }
                         </Button>
                     </form>
                 </Paper>

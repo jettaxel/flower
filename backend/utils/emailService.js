@@ -32,6 +32,9 @@ const sendOrderStatusEmail = async (orderData, attachmentPath = null) => {
         } else if (order.orderStatus === 'Delivered') {
             subject = `Order #${order._id} - Delivered!`;
             htmlContent = createDeliveredEmailTemplate(order, user);
+        } else if (order.orderStatus === 'Cancelled') {
+            subject = `Order #${order._id} - Cancelled`;
+            htmlContent = createCancelledEmailTemplate(order, user);
         }
         
         const mailOptions = {
@@ -173,6 +176,81 @@ const createDeliveredEmailTemplate = (order, user) => {
             </div>
             <div class="footer">
                 <p>Thank you for shopping with Flower Shop!</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+};
+
+// Email template for cancelled orders
+const createCancelledEmailTemplate = (order, user) => {
+    const orderItemsHtml = order.orderItems.map(item => `
+        <tr>
+            <td>${item.name}</td>
+            <td>₱${item.price}</td>
+            <td>${item.quantity} Piece(s)</td>
+            <td>₱${(item.price * item.quantity).toFixed(2)}</td>
+        </tr>
+    `).join('');
+    
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #dc2626; color: white; padding: 20px; text-align: center; }
+            .content { padding: 20px; background: #f9f9f9; }
+            .order-info { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; }
+            .items-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+            .items-table th, .items-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            .items-table th { background: #f2f2f2; }
+            .footer { text-align: center; padding: 20px; color: #666; }
+            .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>❌ Order Cancelled</h1>
+            </div>
+            <div class="content">
+                <p>Hi ${user.name},</p>
+                <p>Your order has been cancelled.</p>
+                
+                <div class="order-info">
+                    <h3>Order Details:</h3>
+                    <p><strong>Order ID:</strong> ${order._id}</p>
+                    <p><strong>Order Status:</strong> <span style="color: #dc2626;">Cancelled</span></p>
+                    <p><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}</p>
+                    <p><strong>Total Amount:</strong> ₱${order.totalPrice}</p>
+                    
+                    <h4>Order Items:</h4>
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${orderItemsHtml}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="warning">
+                    <strong>⚠️ Important:</strong>
+                    <p>If you paid for this order, your refund will be processed according to our refund policy. Please contact our support team if you have any questions.</p>
+                </div>
+            </div>
+            <div class="footer">
+                <p>Thank you for your understanding.</p>
+                <p>Botany & Co</p>
             </div>
         </div>
     </body>

@@ -21,6 +21,7 @@ const OrderDetails = () => {
     const [checkingEligibility, setCheckingEligibility] = useState(false)
     const [canReview, setCanReview] = useState(false)
     const [reviewEligibilityMessage, setReviewEligibilityMessage] = useState('')
+    const [cancelling, setCancelling] = useState(false)
 
     const { shippingInfo, orderItems, paymentInfo, user, totalPrice, orderStatus } = order
     let { id } = useParams();
@@ -91,6 +92,42 @@ const OrderDetails = () => {
 
     const handleReviewStarClick = (starValue) => {
         setReviewRating(starValue)
+    }
+
+    const cancelOrder = async () => {
+        if (!window.confirm('Are you sure you want to cancel this order?')) {
+            return;
+        }
+
+        try {
+            setCancelling(true);
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                }
+            }
+
+            const { data } = await axios.put(
+                `${import.meta.env.VITE_API}/order/${id}/cancel`,
+                {},
+                config
+            );
+
+            toast.success(data.message || 'Order cancelled successfully', {
+                position: 'bottom-right'
+            });
+
+            // Refresh order details
+            getOrderDetails(id);
+        } catch (err) {
+            const message = err?.response?.data?.message || 'Failed to cancel order';
+            toast.error(message, {
+                position: 'bottom-right'
+            });
+        } finally {
+            setCancelling(false);
+        }
     }
 
     const submitReview = async () => {
@@ -167,18 +204,83 @@ const OrderDetails = () => {
             {loading ? <Loader /> : (
                 <div className="min-h-screen bg-white dark:bg-base-dark px-4 py-8">
                     <div className="max-w-5xl mx-auto space-y-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div>
                                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-ink">Order Details</h1>
                                 <p className="text-sm text-gray-600 dark:text-ink-muted">Order # {order._id}</p>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-ink-muted">Status</span>
-                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${order.orderStatus && String(order.orderStatus).includes('Delivered') ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200'}`}>
-                                    {orderStatus}
-                                </span>
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-ink-muted">Status</span>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                        order.orderStatus && String(order.orderStatus).includes('Delivered') 
+                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200'
+                                            : order.orderStatus && String(order.orderStatus).includes('Cancelled')
+                                            ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-200'
+                                            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200'
+                                    }`}>
+                                        {orderStatus}
+                                    </span>
+                                </div>
+                                {order.orderStatus && !['Processing', 'Shipped', 'Delivered', 'Cancelled'].includes(order.orderStatus) && (
+                                    <button
+                                        onClick={cancelOrder}
+                                        disabled={cancelling}
+                                        className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex items-center gap-2"
+                                    >
+                                        {cancelling ? (
+                                            <>
+                                                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                <span>Cancelling...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="fa fa-times" />
+                                                <span>Cancel Order</span>
+                                            </>
+                                        )}
+                                    </button>
+                                )}
                             </div>
                         </div>
+
+                        {/* Cancel Order Alert - Only for Pending orders */}
+                        {order.orderStatus && !['Processing', 'Shipped', 'Delivered', 'Cancelled'].includes(order.orderStatus) && (
+                            <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl p-4 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center">
+                                        <i className="fa fa-exclamation-triangle text-red-600 dark:text-red-400"></i>
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-red-900 dark:text-red-200">Order is Pending</p>
+                                        <p className="text-sm text-red-700 dark:text-red-300">You can cancel this order before it starts processing</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={cancelOrder}
+                                    disabled={cancelling}
+                                    className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex items-center gap-2 whitespace-nowrap"
+                                >
+                                    {cancelling ? (
+                                        <>
+                                            <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            <span>Cancelling...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="fa fa-times" />
+                                            <span>Cancel Order</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-md border border-purple-100 dark:border-purple-500/30 p-5">
@@ -196,6 +298,11 @@ const OrderDetails = () => {
                                     <p className={`text-sm font-semibold ${isPaid ? 'text-emerald-600 dark:text-emerald-300' : 'text-red-600 dark:text-red-300'}`}>
                                         {isPaid ? 'PAID' : 'NOT PAID'}
                                     </p>
+                                    {order.paymentMethod && (
+                                        <p className="text-xs text-gray-600 dark:text-ink-muted mt-1">
+                                            Method: <span className="font-medium capitalize">{order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Card'}</span>
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="mt-4">
                                     <p className="text-xs font-medium text-gray-500 dark:text-ink-muted mb-1">Total Amount</p>
