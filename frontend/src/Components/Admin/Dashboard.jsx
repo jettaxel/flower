@@ -12,6 +12,8 @@ import ProductSalesChart from './ProductSalesChart';
 import UserSalesChart from './UserSalesChart';
 import MonthlySalesChart from './MonthlySalesChart';
 import SalesRangeChart from './SalesRangeChart';
+import { exportAllCharts } from '../../Utils/exportUtils';
+
 const Dashboard = () => {
 
     const [products, setProducts] = useState([])
@@ -87,6 +89,28 @@ const Dashboard = () => {
                                     Overview of your Botany &amp; Co store performance
                                 </p>
                             </div>
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        toast.info('Exporting charts...', { position: 'bottom-right' });
+                                        await exportAllCharts([
+                                            'product-sales-chart',
+                                            'user-sales-chart',
+                                            'monthly-sales-chart',
+                                            'sales-range-chart'
+                                        ]);
+                                        toast.success('Charts exported successfully!', { position: 'bottom-right' });
+                                    } catch (error) {
+                                        toast.error('Failed to export charts: ' + error.message, { position: 'bottom-right' });
+                                    }
+                                }}
+                                className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 dark:from-green-400 dark:to-emerald-400 text-white font-semibold rounded-lg shadow-md hover:opacity-90 transition-all duration-200 flex items-center gap-2"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Export Charts
+                            </button>
                         </div>
 
                         {loading ? (
@@ -208,7 +232,7 @@ const Dashboard = () => {
                                             <h2 className="text-lg font-semibold text-gray-900 dark:text-ink">Sales by Product</h2>
                                             <span className="text-xs text-gray-500 dark:text-ink-muted">Top-performing items</span>
                                         </div>
-                                        <div className="h-[260px]">
+                                        <div id="product-sales-chart" className="h-[260px]">
                                             <ProductSalesChart />
                                         </div>
                                     </div>
@@ -218,7 +242,7 @@ const Dashboard = () => {
                                             <h2 className="text-lg font-semibold text-gray-900 dark:text-ink">Sales by Customer</h2>
                                             <span className="text-xs text-gray-500 dark:text-ink-muted">Which customers spend the most</span>
                                         </div>
-                                        <div className="h-[260px]">
+                                        <div id="user-sales-chart" className="h-[260px]">
                                             <UserSalesChart />
                                         </div>
                                     </div>
@@ -230,7 +254,7 @@ const Dashboard = () => {
                                             <h2 className="text-lg font-semibold text-gray-900 dark:text-ink">Monthly Sales (Current Year)</h2>
                                             <span className="text-xs text-gray-500 dark:text-ink-muted">Seasonality and trends</span>
                                         </div>
-                                        <div className="h-[260px]">
+                                        <div id="monthly-sales-chart" className="h-[260px]">
                                             <MonthlySalesChart />
                                         </div>
                                     </div>
@@ -240,7 +264,7 @@ const Dashboard = () => {
                                             <h2 className="text-lg font-semibold text-gray-900 dark:text-ink">Sales by Month Range</h2>
                                             <span className="text-xs text-gray-500 dark:text-ink-muted">Compare custom periods</span>
                                         </div>
-                                        <div className="h-[260px]">
+                                        <div id="sales-range-chart" className="h-[260px]">
                                             <SalesRangeChart />
                                         </div>
                                     </div>

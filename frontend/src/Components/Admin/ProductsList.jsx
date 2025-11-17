@@ -10,6 +10,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { DataGrid, } from '@mui/x-data-grid'
+import { exportProductsToPDF } from '../../Utils/exportUtils'
 
 const ProductsList = () => {
     const [products, setProducts] = useState([])
@@ -252,15 +253,40 @@ const ProductsList = () => {
                                         Manage your flower shop inventory
                                     </p>
                                 </div>
-                                <Link
-                                    to="/admin/newproduct"
-                                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 dark:from-purple-400 dark:to-indigo-400 text-white font-semibold rounded-lg shadow-md hover:opacity-90 transition-all duration-200 flex items-center gap-2"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    Add New Product
-                                </Link>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={async () => {
+                                            try {
+                                                toast.info('Exporting products to PDF...', {
+                                                    position: 'bottom-right'
+                                                });
+                                                await exportProductsToPDF(products);
+                                                toast.success('Products exported successfully!', {
+                                                    position: 'bottom-right'
+                                                });
+                                            } catch (error) {
+                                                toast.error('Failed to export products: ' + error.message, {
+                                                    position: 'bottom-right'
+                                                });
+                                            }
+                                        }}
+                                        className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 dark:from-green-400 dark:to-emerald-400 text-white font-semibold rounded-lg shadow-md hover:opacity-90 transition-all duration-200 flex items-center gap-2"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        Export Products
+                                    </button>
+                                    <Link
+                                        to="/admin/newproduct"
+                                        className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 dark:from-purple-400 dark:to-indigo-400 text-white font-semibold rounded-lg shadow-md hover:opacity-90 transition-all duration-200 flex items-center gap-2"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        Add New Product
+                                    </Link>
+                                </div>
                             </div>
                             
                             {/* Bulk Actions */}
