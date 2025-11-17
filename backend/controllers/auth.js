@@ -112,6 +112,14 @@ exports.loginUser = async (req, res, next) => {
                 return res.status(401).json({ message: 'User not found. Please register first.' });
             }
 
+            // Check if user is active
+            if (!user.isActive) {
+                return res.status(403).json({ 
+                    success: false,
+                    message: 'Your account has been deactivated. Please contact an administrator.' 
+                });
+            }
+
             const token = user.getJwtToken();
             return res.status(200).json({
                 success: true,
@@ -130,6 +138,14 @@ exports.loginUser = async (req, res, next) => {
         let user = await User.findOne({ email }).select('+password');
         if (!user) {
             return res.status(401).json({ message: 'Invalid Email or Password' });
+        }
+
+        // Check if user is active
+        if (!user.isActive) {
+            return res.status(403).json({ 
+                success: false,
+                message: 'Your account has been deactivated. Please contact an administrator.' 
+            });
         }
 
         // Checks if password is correct or not
@@ -425,6 +441,49 @@ exports.bulkDeleteUsers = async (req, res, next) => {
         return res.status(500).json({
             success: false,
             message: 'Error deleting users'
+        });
+    }
+}
+
+exports.toggleUserStatus = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Prevent deactivating yourself
+        if (user._id.toString() === req.user._id.toString()) {
+            return res.status(400).json({
+                success: false,
+                message: 'You cannot deactivate your own account'
+            });
+        }
+
+        // Toggle the isActive status
+        user.isActive = !user.isActive;
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: `User ${user.isActive ? 'activated' : 'deactivated'} successfully`,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                isActive: user.isActive
+            }
+        });
+    } catch (error) {
+        console.error('Toggle user status error:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error toggling user status'
         });
     }
 }

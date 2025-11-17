@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: 'user'
     },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
     firebaseUid: {
         type: String,
         sparse: true // Allows null values and creates sparse index

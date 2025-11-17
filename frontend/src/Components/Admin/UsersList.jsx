@@ -18,6 +18,7 @@ const UsersList = () => {
     const [allUsers, setAllUsers] = useState([])
     const [selectedUsers, setSelectedUsers] = useState([])
     const [bulkDeleting, setBulkDeleting] = useState(false)
+    const [togglingStatus, setTogglingStatus] = useState({})
     let navigate = useNavigate();
     const config = {
         headers: {
@@ -110,6 +111,33 @@ const UsersList = () => {
         })
     }
 
+    const toggleUserStatus = async (userId) => {
+        try {
+            setTogglingStatus(prev => ({ ...prev, [userId]: true }))
+            const { data } = await axios.put(
+                `${import.meta.env.VITE_API}/admin/user/${userId}/toggle-status`,
+                {},
+                config
+            )
+
+            if (data.success) {
+                successMsg(data.message)
+                // Update the user in the list
+                setAllUsers(prevUsers => 
+                    prevUsers.map(user => 
+                        user._id === userId 
+                            ? { ...user, isActive: data.user.isActive }
+                            : user
+                    )
+                )
+            }
+            setTogglingStatus(prev => ({ ...prev, [userId]: false }))
+        } catch (error) {
+            setTogglingStatus(prev => ({ ...prev, [userId]: false }))
+            errMsg(error.response?.data?.message || 'Failed to toggle user status')
+        }
+    }
+
     const columns = [
         {
             field: 'select',
@@ -176,34 +204,76 @@ const UsersList = () => {
                 </span>
             )
         },
-
+        {
+            field: 'isActive',
+            headerName: '📊 Status',
+            width: 120,
+            renderCell: (params) => (
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    params.value 
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                }`}>
+                    {params.value ? 'Active' : 'Inactive'}
+                </span>
+            )
+        },
         {
             field: 'actions',
             headerName: '⚙️ Actions',
-            width: 100,
+            width: 200,
             sortable: false,
             filterable: false,
-            renderCell: (params) => (
-                <div className="flex items-center justify-center">
-                    <Link 
-                        to={`/admin/user/${params.id}`} 
-                        className="p-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-all duration-200 shadow-sm hover:shadow-md"
-                        title="Edit User"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                    </Link>
-                </div>
-            )
+            renderCell: (params) => {
+                const isActive = params.row.isActive;
+                const isLoading = togglingStatus[params.id];
+                return (
+                    <div className="flex items-center justify-center gap-2">
+                        <button
+                            onClick={() => toggleUserStatus(params.id)}
+                            disabled={isLoading}
+                            className={`p-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md ${
+                                isActive
+                                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                                    : 'bg-green-500 hover:bg-green-600 text-white'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                            title={isActive ? 'Deactivate User' : 'Activate User'}
+                        >
+                            {isLoading ? (
+                                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            ) : isActive ? (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                </svg>
+                            ) : (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            )}
+                        </button>
+                        <Link 
+                            to={`/admin/user/${params.id}`} 
+                            className="p-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-all duration-200 shadow-sm hover:shadow-md"
+                            title="Edit User"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </Link>
+                    </div>
+                )
+            }
         }
     ];
     const rows = allUsers.map(user => ({
         id: user._id,
         name: user.name,
-
         email: user.email,
         role: user.role,
+        isActive: user.isActive !== undefined ? user.isActive : true,
     }));
 
     return (
