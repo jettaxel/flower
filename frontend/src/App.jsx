@@ -176,12 +176,40 @@ function App() {
           <Route path="/order/:id" element={<OrderDetails />} />
            {/* <Route path="/dashboard" element={<Dashboard />} /> */}
           {/* <Route path="/admin/products" element={<ProductsList />} /> */}
-         <Route path="/admin/newproduct" element={<NewProduct />} />
-         <Route path="/admin/product/:id" element={<UpdateProduct />} />
+         <Route 
+           path="/admin/newproduct" 
+           element={
+             <ProtectedRoute isAdmin={true}>
+               <NewProduct />
+             </ProtectedRoute>
+           } 
+         />
+         <Route 
+           path="/admin/product/:id" 
+           element={
+             <ProtectedRoute isAdmin={true}>
+               <UpdateProduct />
+             </ProtectedRoute>
+           } 
+         />
           
             
-            <Route path="/admin/user/new" element={<NewUser />} />
-            <Route path="/admin/user/:id" element={<UpdateUser />} />
+            <Route 
+              path="/admin/user/new" 
+              element={
+                <ProtectedRoute isAdmin={true}>
+                  <NewUser />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/user/:id" 
+              element={
+                <ProtectedRoute isAdmin={true}>
+                  <UpdateUser />
+                </ProtectedRoute>
+              } 
+            />
 
 
             <Route
@@ -219,8 +247,24 @@ function App() {
               />
 
 
-                  <Route path="/admin/orders" element={<OrdersList />} />
-          <Route path="/admin/order/:id" element={<ProcessOrder />} />
+          <Route
+            path="/admin/orders"
+            element={
+              <ProtectedRoute isAdmin={true}>
+                <OrdersList />
+              </ProtectedRoute>}
+          />
+
+          <Route 
+            path="/admin/order/:id" 
+            element={
+              <ProtectedRoute isAdmin={true}>
+                <ProcessOrder />
+              </ProtectedRoute>
+            } 
+          />
+
+
         </Routes>
 
       </Router>
